@@ -1,5 +1,5 @@
 /*
- * Thermal-FIST package
+ * Thermal-FIST 
  * 
  * Copyright (c) 2014-2018 Volodymyr Vovchenko
  *
@@ -33,30 +33,54 @@ int main(int argc, char *argv[])
 	if (argc > 1)
 		ModelType = atoi(argv[1]);
 
+
+
 	std::string prefix = "QvdW-HRG";
 	if (ModelType != 1)
 		prefix = "IdealHRG";
 	
 	// Fill the T-mu values where calculations should be performed
-	vector<double> Tvalues, muvalues;
+	vector<double> T_values, muB_values, muS_values, muQ_values;
 
 	// Here done by hand
 	// Alternatively one can read those from external file, or populate in a loop, etc.
 	// Note that all energy units are in GeV!
 	// 1
-	Tvalues.push_back(0.100); muvalues.push_back(0.600);
+	// Tvalues.push_back(0.500); muvalues.push_back(0.600);
 	// 2
-	Tvalues.push_back(0.130); muvalues.push_back(0.500);
+	// Tvalues.push_back(0.500); muvalues.push_back(0.600);
 	// 3
-	Tvalues.push_back(0.160); muvalues.push_back(0.000);
+	// Tvalues.push_back(0.500); muvalues.push_back(0.600);
 
+//auto approximately_equals = [](double a, double b){
+//	return static_cast<bool>( std::abs(a-b) < 0.000001 );
+//};
+
+double deltamuB = 0.05;
+double deltamuS = 0.05;
+double deltamuQ = 0.05;
+for (double mu_B = 0; mu_B < 0.8 + 0.5 * deltamuB; mu_B += deltamuB)
+{
+	for (double mu_S = 0; mu_S < 0.8 + 0.5 * deltamuS; mu_S += deltamuS)
+	{
+		for (double mu_Q = 0; mu_Q < 0.8 + 0.5 * deltamuQ; mu_Q += deltamuQ)
+		//if (!approximately_equals(T, 0.37) || !approximately_equals(mu_B, 0.1))
+		//	continue;
+			{
+			T_values.push_back(0.180);
+			muB_values.push_back(mu_B);
+			muS_values.push_back(mu_S);
+			muQ_values.push_back(mu_Q);
+			}
+	}
+}
 
 	// Create the hadron list instance and read the list from file
 
 
 	//ThermalParticleSystem TPS(string(ThermalFIST_INPUT_FOLDER) + "/list/thermus23mod/list.dat"); // <-- modified THERMUS-2.3 list
-	ThermalParticleSystem TPS(string(ThermalFIST_INPUT_FOLDER) + "/list/PDG2014/list.dat");  // <-- Default list, no light nuclei
-	//ThermalParticleSystem TPS(string(ThermalFIST_INPUT_FOLDER) + "/list/PDG2014/list-withnuclei.dat");  // <-- Default list, with light nuclei
+	//ThermalParticleSystem TPS(string(ThermalFIST_INPUT_FOLDER) + "/list/PDG2014/list.dat");  // <-- Default list, no light nuclei
+	ThermalParticleSystem TPS(string(ThermalFIST_INPUT_FOLDER) + "/list/PDG2020/list-withnuclei.dat");  // <-- Default list, with light nuclei
 
 	// Create the ThermalModel instance
 	// Choose the class which fits the required variant of HRG model
@@ -114,51 +138,55 @@ int main(int argc, char *argv[])
 	model->SetStatistics(true);
 
 	// Output, here on screen, to write into file use, e.g., fprintf
-	printf("%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s\n", 
-		"T[GeV]", "muB[GeV]", 
-		"P[GeV/fm3]", "e[GeV/fm3]", "s[fm-3]", 
-		"<K+>", "<pi+>", "<K+>/<pi+>", 
-		"w[K+]", "w[pi+]",
-		"<N->", "w[N-]",
-		"chi3B/chi2B", "chi4B/chi2B",
-		"chi3Q/chi2Q", "chi4Q/chi2Q",
-		"chi3S/chi2S", "chi4S/chi2S");
+	//printf("%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s\n", 
+		// "T[GeV]", "muB[GeV]", 
+		// "P[GeV/fm3]", "e[GeV/fm3]", "s[fm-3]", 
+		// "<K+>", "<pi+>", "<K+>/<pi+>", 
+		// "w[K+]", "w[pi+]",
+		// "<N->", "w[N-]",
+		// "chi3B/chi2B", "chi4B/chi2B",
+		// "chi3Q/chi2Q", "chi4Q/chi2Q",
+		// "chi3S/chi2S", "chi4S/chi2S");
+	printf("Check: %15s %15s %15s %15s %15s %15s %15s %15s %15s %15s\n", "T[GeV]", "muB", "muS", "muQ", "Chi2B", "Chi2Q", "Chi2S", "chi11BQ", "chi11BS", "chi11QS");
+
 
 	// The same output to file
 	std::string filename = prefix + ".CalculationTmu.dat";
 	FILE *f = fopen(filename.c_str(), "w");
-	fprintf(f, "%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s\n",
-		"T[GeV]", "muB[GeV]",
-		"P[GeV/fm3]", "e[GeV/fm3]", "s[fm-3]",
-		"<K+>", "<pi+>", "<K+>/<pi+>",
-		"w[K+]", "w[pi+]",
-		"<N->", "w[N-]",
-		"chi3B/chi2B", "chi4B/chi2B",
-		"chi3Q/chi2Q", "chi4Q/chi2Q",
-		"chi3S/chi2S", "chi4S/chi2S");
+	// fprintf(f, "%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s\n",
+	// 	"T[GeV]", "muB[GeV]",
+	// 	"P[GeV/fm3]", "e[GeV/fm3]", "s[fm-3]",
+	// 	"<K+>", "<pi+>", "<K+>/<pi+>",
+	// 	"w[K+]", "w[pi+]",
+	// 	"<N->", "w[N-]",
+	// 	"chi3B/chi2B", "chi4B/chi2B",
+	// 	"chi3Q/chi2Q", "chi4Q/chi2Q",
+	// 	"chi3S/chi2S", "chi4S/chi2S");
+	fprintf(f, "%15s %15s %15s %15s %15s %15s %15s %15s %15s %15s\n", "T[GeV]", "muB", "muS", "muQ", "Chi2B", "Chi2Q", "Chi2S", "chi11BQ", "chi11BS", "chi11QS");
 
 	// Iterate over all the T-muB pair values
-	for (int i = 0; i < Tvalues.size(); ++i) {
-		double T   = Tvalues[i];
-		double muB = muvalues[i];
-
+	for (int i = 0; i < T_values.size(); ++i) {
+		double T   = T_values[i];
+		double muB = muB_values[i];
+		double muS = muS_values[i];
+		double muQ = muQ_values[i];
 
 		// Set temperature and baryon chemical potential
 		model->SetTemperature(T);
 		model->SetBaryonChemicalPotential(muB);
 
 		// Constrain muB from strangeness neutrality condition
-		model->ConstrainMuS(true);
+		// model->ConstrainMuS(true);
 		// Alternatively set the muS value manually
-		// model->ConstrainMuS(false);
-		// model->SetStrangenessChemicalPotential(0.);
+		model->ConstrainMuS(false);
+		model->SetStrangenessChemicalPotential(muS);
 
 		// Constrain muq from Q/B = 0.4 condition
-		model->ConstrainMuQ(true);
-		model->SetQoverB(0.4);
+		// model->ConstrainMuQ(true);
+		// model->SetQoverB(0.4);
 		// Alternatively set the muQ value manually
-		//model->ConstrainMuQ(false);
-		//model->SetElectricChemicalPotential(0.);
+		model->ConstrainMuQ(false);
+		model->SetElectricChemicalPotential(muQ);
 
 		// Chemical non-equilbrium parameters
 		model->SetGammaq(1.);
@@ -226,6 +254,17 @@ int main(int argc, char *argv[])
 		double chi3B = chchis[2];
 		double chi4B = chchis[3];
 
+		// Perform the calculation
+        model->CalculatePrimordialDensities();
+        model->CalculateFluctuations();
+          
+          
+        // Susceptibilities
+        double chi11BQ = model->Susc(ConservedCharge::BaryonCharge, ConservedCharge::ElectricCharge);
+        double chi11BS = model->Susc(ConservedCharge::BaryonCharge, ConservedCharge::StrangenessCharge);
+        double chi11QS = model->Susc(ConservedCharge::ElectricCharge, ConservedCharge::StrangenessCharge);
+
+
 		// Electric charge, same procedure
 		for (int i = 0; i < model->TPS()->Particles().size(); ++i) {
 			chargesQ[i] = model->TPS()->Particles()[i].ElectricCharge();
@@ -247,46 +286,48 @@ int main(int argc, char *argv[])
 		double chi4S = chchis[3];
 
 
-		printf("%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf\n",
-			T,
-			muB,
-			p,
-			e,
-			s,
-			yieldKplus,
-			yieldpiplus,
-			yieldKplus/yieldpiplus,
-			wKplus,
-			wpiplus,
-			Nminus,
-			wNminus,
-			chi3B / chi2B,
-			chi4B / chi2B,
-			chi3Q / chi2Q,
-			chi4Q / chi2Q,
-			chi3S / chi2S,
-			chi4S / chi2S);
-
-		fprintf(f, "%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf\n",
-			T,
-			muB,
-			p,
-			e,
-			s,
-			yieldKplus,
-			yieldpiplus,
-			yieldKplus / yieldpiplus,
-			wKplus,
-			wpiplus,
-			Nminus,
-			wNminus,
-			chi3B / chi2B,
-			chi4B / chi2B,
-			chi3Q / chi2Q,
-			chi4Q / chi2Q,
-			chi3S / chi2S,
-			chi4S / chi2S);
+		// printf("%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf\n",
+			// T,
+			// muB,
+			// p,
+			// e,
+			// s,
+			// yieldKplus,
+			// yieldpiplus,
+			// yieldKplus/yieldpiplus,
+			// wKplus,
+			// wpiplus,
+			// Nminus,
+			// wNminus,
+			// chi3B / chi2B,
+			// chi4B / chi2B,
+			// chi3Q / chi2Q,
+			// chi4Q / chi2Q,
+			// chi3S / chi2S,
+			// chi4S / chi2S);
+		printf("%15lf %15lf %15lf %15lf %15lf %15lf %15lf %15lf %15lf %15lf\n", T, muB, muS, muQ, chi2B, chi2Q, chi2S, chi11BQ, chi11BS, chi11QS);
+		// fprintf(f, "%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf%15lf\n",
+		// 	T,
+		// 	muB,
+		// 	p,
+		// 	e,
+		// 	s,
+		// 	yieldKplus,
+		// 	yieldpiplus,
+		// 	yieldKplus / yieldpiplus,
+		// 	wKplus,
+		// 	wpiplus,
+		// 	Nminus,
+		// 	wNminus,
+		// 	chi3B / chi2B,
+		// 	chi4B / chi2B,
+		// 	chi3Q / chi2Q,
+		// 	chi4Q / chi2Q,
+		// 	chi3S / chi2S,
+		// 	chi4S / chi2S);
+		fprintf(f, "%15lf %15lf %15lf %15lf %15lf %15lf %15lf %15lf %15lf %15lf\n", T, muB, muS, muQ, chi2B, chi2Q, chi2S, chi11BQ, chi11BS, chi11QS);
 	}
+	
 
 	fclose(f);
 
