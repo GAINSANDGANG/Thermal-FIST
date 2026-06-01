@@ -59,22 +59,26 @@ int main(int argc, char *argv[])
 double deltamuB = 0.05;
 double deltamuS = 0.05;
 double deltamuQ = 0.05;
-for (double mu_B = 0; mu_B < 0.8 + 0.5 * deltamuB; mu_B += deltamuB)
+double deltaT = 0.010;
+
+for (double T = 0.100; T < 0.17 + 0.5 * deltaT; T += deltaT)
 {
-	for (double mu_S = 0; mu_S < 0.8 + 0.5 * deltamuS; mu_S += deltamuS)
+	for (double mu_B = 0; mu_B < 0.8 + 0.5 * deltamuB; mu_B += deltamuB)
 	{
-		for (double mu_Q = 0; mu_Q < 0.8 + 0.5 * deltamuQ; mu_Q += deltamuQ)
-		//if (!approximately_equals(T, 0.37) || !approximately_equals(mu_B, 0.1))
-		//	continue;
-			{
-			T_values.push_back(0.180);
-			muB_values.push_back(mu_B);
-			muS_values.push_back(mu_S);
-			muQ_values.push_back(mu_Q);
-			}
+		for (double mu_S = 0; mu_S < 0.8 + 0.5 * deltamuS; mu_S += deltamuS)
+		{
+			for (double mu_Q = 0; mu_Q < 0.8 + 0.5 * deltamuQ; mu_Q += deltamuQ)
+			//if (!approximately_equals(T, 0.37) || !approximately_equals(mu_B, 0.1))
+			//	continue;
+				{
+				T_values.push_back(T);
+				muB_values.push_back(mu_B);
+				muS_values.push_back(mu_S);
+				muQ_values.push_back(mu_Q);
+				}
+		}
 	}
 }
-
 	// Create the hadron list instance and read the list from file
 
 
